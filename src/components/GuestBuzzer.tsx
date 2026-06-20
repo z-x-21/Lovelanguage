@@ -180,14 +180,6 @@ export default function GuestBuzzer({
             </button>
           </form>
 
-          {isSandbox && (
-            <button
-              onClick={onBackToMenu}
-              className="mt-6 text-[10px] text-brand-gray/40 hover:text-brand-gray/70 underline tracking-widest uppercase cursor-pointer block mx-auto"
-            >
-              Volver a la selección de roles
-            </button>
-          )}
         </div>
       </div>
     );
@@ -343,16 +335,6 @@ export default function GuestBuzzer({
         )}
       </div>
 
-      {isSandbox && (
-        <div className="mt-4 pt-3 flex items-center justify-center text-xs pb-4">
-          <button
-            onClick={onBackToMenu}
-            className="text-brand-gray/40 hover:text-brand-gray/70 underline underline-offset-4 decoration-gold/40 tracking-wider font-semibold uppercase text-[9px] cursor-pointer"
-          >
-            Salir de la Sala (Modo Sandbox)
-          </button>
-        </div>
-      )}
     </div>
   );
 }
