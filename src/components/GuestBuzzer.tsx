@@ -52,6 +52,7 @@ export default function GuestBuzzer({
   const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
   const [questionTriggerTime, setQuestionTriggerTime] = React.useState<number | null>(null);
   const [pointsWagered, setPointsWagered] = React.useState(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Sync state: if new question is activated, unlock local answer options
   React.useEffect(() => {
@@ -59,6 +60,7 @@ export default function GuestBuzzer({
       const startTime = gameState.timerEndAt - (gameState.timerDuration * 1000);
       setQuestionTriggerTime(startTime);
       setSelectedOption(null);
+      setIsSubmitting(false);
     }
   }, [gameState.currentQuestionIndex, gameState.questionActive, gameState.timerEndAt]);
 
@@ -91,8 +93,9 @@ export default function GuestBuzzer({
 
   // Handles clicking any of the 4 quadrant buttons
   const handleBuzzerClick = async (option: string) => {
-    if (hasSubmitted || !gameState.questionActive || !activeQuestion) return;
+    if (isSubmitting || hasSubmitted || !gameState.questionActive || !activeQuestion) return;
 
+    setIsSubmitting(true);
     setSelectedOption(option);
     
     // Compute response velocity
@@ -250,26 +253,33 @@ export default function GuestBuzzer({
             <div className="grid grid-cols-2 gap-4 min-h-[280px]">
               {/* Quadrant buttons: A, B, C, D */}
               {activeQuestion?.options.map((opt, oIdx) => {
-                const colorSchemes = [
-                  'border-gold text-brand-gray hover:bg-blush/10 bg-white active:scale-95',
-                  'border-gold text-brand-gray hover:bg-blush/10 bg-white active:scale-95',
-                  'border-gold text-brand-gray hover:bg-blush/10 bg-white active:scale-95',
-                  'border-gold text-brand-gray hover:bg-blush/10 bg-white active:scale-95'
-                ];
-                const bgClass = colorSchemes[oIdx] || 'border-brand-gray/10';
+                const isSelected = selectedOption === opt;
+                const isLocked = isSubmitting || hasSubmitted;
+
+                const buttonClass = isSelected
+                  ? 'bg-brand-gray border-gold text-white scale-[0.98] shadow-md'
+                  : isLocked
+                  ? 'bg-white border-gold/20 text-brand-gray/30 cursor-not-allowed'
+                  : 'bg-white border-gold text-brand-gray hover:bg-blush/10 active:scale-95 cursor-pointer';
 
                 return (
                   <button
                     key={oIdx}
                     onClick={() => handleBuzzerClick(opt)}
-                    className={`${bgClass} border rounded-none p-5 font-bold flex flex-col justify-between text-left shadow-sm transition-all relative overflow-hidden group cursor-pointer`}
+                    disabled={isLocked}
+                    className={`${buttonClass} border rounded-none p-5 font-bold flex flex-col justify-between text-left shadow-sm transition-all relative overflow-hidden`}
                   >
-                    <span className="text-2xl opacity-20 font-serif leading-none text-gold italic">
+                    <span className={`text-2xl font-serif leading-none italic ${isSelected ? 'text-gold opacity-80' : 'opacity-20 text-gold'}`}>
                       {String.fromCharCode(65 + oIdx)}
                     </span>
-                    <span className="text-xs tracking-tight font-serif italic leading-snug mt-4 text-brand-gray block" title={opt}>
+                    <span className={`text-xs tracking-tight font-serif italic leading-snug mt-4 block ${isSelected ? 'text-white' : 'text-brand-gray'}`} title={opt}>
                       {opt}
                     </span>
+                    {isSelected && (
+                      <span className="absolute top-2 right-2 text-gold text-[10px] font-sans font-bold uppercase tracking-widest animate-pulse">
+                        ✓ Enviando…
+                      </span>
+                    )}
                   </button>
                 );
               })}
