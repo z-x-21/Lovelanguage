@@ -175,8 +175,8 @@ export default function App() {
     );
   }
 
-  // Override: If game status is 'completed', show LeaderboardPodium globally for host/sandbox/guest!
-  if (safeState.status === 'completed') {
+  // Override: show LeaderboardPodium when completed — except sandbox (needs full control for testing)
+  if (safeState.status === 'completed' && role !== 'sandbox') {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
         <LeaderboardPodium
@@ -264,14 +264,30 @@ export default function App() {
               <div className="text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 px-3 py-1 rounded-full inline-block font-semibold">
                 🔧 Modo de Pruebas Interactivo Activo (El panel izquierdo actúa como Organizador / El panel derecho actúa como Invitado Móvil)
               </div>
-              <button
-                onClick={() => setRole('lobby')}
-                className="block mx-auto text-xs text-rose-500 hover:text-rose-700 underline mt-2 font-bold cursor-pointer"
-              >
-                Salir del Modo de Pruebas
-              </button>
+              <div className="flex items-center justify-center gap-4 mt-2">
+                <button
+                  onClick={() => setRole('lobby')}
+                  className="text-xs text-rose-500 hover:text-rose-700 underline font-bold cursor-pointer"
+                >
+                  Salir del Modo de Pruebas
+                </button>
+                {safeState.status === 'completed' && (
+                  <button
+                    onClick={async () => { await handleResetSession(); }}
+                    className="text-xs bg-gold text-brand-gray font-bold px-3 py-1 rounded hover:bg-gold-hover cursor-pointer"
+                  >
+                    ↺ Reiniciar Juego (Sandbox)
+                  </button>
+                )}
+              </div>
             </div>
 
+            {safeState.status === 'completed' ? (
+              <LeaderboardPodium
+                guests={guests}
+                onRestart={async () => { await handleResetSession(); }}
+              />
+            ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Host Controller Sidebar Left */}
               <div className="lg:col-span-7 bg-white rounded-2xl shadow-lg border border-slate-200 p-2">
@@ -307,6 +323,7 @@ export default function App() {
                 />
               </div>
             </div>
+            )}
           </div>
         )}
       </main>
