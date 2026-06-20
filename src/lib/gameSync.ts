@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { 
-  doc, 
-  setDoc, 
-  updateDoc, 
-  onSnapshot, 
-  collection, 
-  getDocs, 
-  deleteDoc, 
+import {
+  doc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  collection,
+  getDocs,
+  deleteDoc,
   writeBatch,
+  increment,
   query,
   orderBy
 } from 'firebase/firestore';
@@ -160,21 +161,11 @@ export async function submitResponse(
     });
 
     if (isCorrect && pointsEarned > 0) {
-      // Award score in the guest's own document via Firestore
       const guestDocRef = doc(db, 'sessions', SESSION_DOC_ID, 'guests', guestId);
-      // To keep it simple, we can retrieve and update, or use transaction/server details
-      // Since guests submit independently, a direct read & write or standard increment is perfect!
-      // To keep it simple, we can update or use local score accumulator if we listen.
-      // Let's increment score and correctCount beautifully:
-      const querySnap = await getDocs(collection(db, 'sessions', SESSION_DOC_ID, 'guests'));
-      const guestSnap = querySnap.docs.find(d => d.id === guestId);
-      if (guestSnap && guestSnap.exists()) {
-        const currentData = guestSnap.data();
-        await updateDoc(guestDocRef, {
-          score: (currentData.score || 0) + pointsEarned,
-          correctCount: (currentData.correctCount || 0) + 1
-        });
-      }
+      await updateDoc(guestDocRef, {
+        score: increment(pointsEarned),
+        correctCount: increment(1)
+      });
     }
   } catch (err) {
     console.error('Could not log response:', err);

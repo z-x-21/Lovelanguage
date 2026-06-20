@@ -84,7 +84,7 @@ export default function HostConsole({
   const handleTriggerTimer = async () => {
     if (!activeQuestion) return;
 
-    const timerDurationMs = 20 * 1000;
+    const timerDurationMs = (gameState.timerDuration || 20) * 1000;
     const timerEndAt = Date.now() + timerDurationMs;
 
     // Reset current active question's status to accept new inputs

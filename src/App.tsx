@@ -25,10 +25,11 @@ import CouplePanel from './components/CouplePanel';
 import HostConsole from './components/HostConsole';
 import GuestBuzzer from './components/GuestBuzzer';
 import LeaderboardPodium from './components/LeaderboardPodium';
+import DisplayScreen from './components/DisplayScreen';
 
 export default function App() {
   // Read initial role from query parameter, hash, or pathname to keep screens independent
-  const getInitialRole = (): 'lobby' | 'couple' | 'host' | 'guest' | 'sandbox' => {
+  const getInitialRole = (): 'lobby' | 'couple' | 'host' | 'guest' | 'sandbox' | 'display' => {
     if (typeof window === 'undefined') return 'lobby';
     const params = new URLSearchParams(window.location.search);
     const roleParam = params.get('role');
@@ -41,18 +42,19 @@ export default function App() {
     if (normalized === 'sandbox' || normalized === 'pruebas') return 'sandbox';
     if (normalized === 'admin' || normalized === 'lobby') return 'lobby';
     if (normalized === 'guest' || normalized === 'invitado') return 'guest';
-    
+    if (normalized === 'display' || normalized === 'pantalla' || normalized === 'tv') return 'display';
+
     // Auto-resume if the guest already joined previously with a nickname
     const savedName = localStorage.getItem('wedding_trivia_guest_name');
     if (savedName) {
       return 'guest';
     }
-    
+
     // Default to 'lobby' so the user can choose their seat (Couple, Organizer, or Guest)
     return 'lobby';
   };
 
-  const [role, setRole] = React.useState<'lobby' | 'couple' | 'host' | 'guest' | 'sandbox'>(getInitialRole);
+  const [role, setRole] = React.useState<'lobby' | 'couple' | 'host' | 'guest' | 'sandbox' | 'display'>(getInitialRole);
   
   // Database real-time values and connection diagnostic tracking
   const [gameState, setGameState] = React.useState<GameState | null>(null);
@@ -158,6 +160,21 @@ export default function App() {
     showResults: false
   };
 
+  // Display role: full-screen read-only TV/projector view (no shell chrome)
+  if (role === 'display') {
+    return (
+      <DisplayScreen
+        gameState={safeState}
+        questions={questions}
+        guests={guests}
+        responses={responses}
+        onRestartFromPodium={async () => {
+          await handleResetSession();
+        }}
+      />
+    );
+  }
+
   // Override: If game status is 'completed', show LeaderboardPodium globally for host/sandbox/guest!
   if (safeState.status === 'completed') {
     return (
@@ -170,7 +187,7 @@ export default function App() {
           }}
         />
         <footer className="py-4 text-center text-[10px] text-slate-400 font-mono border-t border-slate-150">
-          Sincronizador de Bodas. Ejecutando con Firestore en la nube us-east1.
+          Sincronizador de Bodas • Trivia en tiempo real
         </footer>
       </div>
     );
@@ -294,9 +311,8 @@ export default function App() {
         )}
       </main>
 
-      <footer className="py-6 text-center text-[10px] text-slate-450 font-mono border-t border-slate-200/50 bg-white">
-        <div>Consola de Trivia de Bodas • Sincronización en tiempo real vía Firestore</div>
-        <div className="text-slate-400 mt-1">Servidor en puerto 3000 • Desarrollado con Google AI Studio</div>
+      <footer className="py-6 text-center text-[10px] text-slate-400 font-mono border-t border-slate-200/50 bg-white">
+        Consola de Trivia de Bodas • Sincronización en tiempo real vía Firestore
       </footer>
     </div>
   );

@@ -62,7 +62,7 @@ export default function GuestBuzzer({
   React.useEffect(() => {
     if (gameState.questionActive && gameState.timerEndAt) {
       // Calculate when the question actually started
-      const startTime = gameState.timerEndAt - 20000;
+      const startTime = gameState.timerEndAt - (gameState.timerDuration * 1000);
       setQuestionTriggerTime(startTime);
       setSelectedOption(null); // Reset for new question
     }

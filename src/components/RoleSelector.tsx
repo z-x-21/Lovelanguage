@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Heart, Crown, Tv, Smartphone, RefreshCw, Layers, ShieldAlert } from 'lucide-react';
+import { Heart, Crown, Tv, Smartphone, RefreshCw, Layers, ShieldAlert, Monitor } from 'lucide-react';
 
 interface RoleSelectorProps {
   onSelectRole: (role: 'couple' | 'host' | 'guest' | 'sandbox') => void;
@@ -166,6 +166,29 @@ export default function RoleSelector({
             Iniciar Modo Pruebas
           </button>
         </div>
+      </div>
+
+      {/* Public Display Screen link */}
+      <div className="border border-brand-gray/10 bg-slate-50 p-5 flex flex-col md:flex-row items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-4">
+          <div className="w-10 h-10 border border-brand-gray/20 rounded-full flex items-center justify-center text-brand-gray/60 flex-shrink-0">
+            <Monitor className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-[10px] text-brand-gray/50 uppercase font-medium tracking-wider mb-0.5">Proyector / TV del Salón</div>
+            <p className="text-xs text-brand-gray/70 leading-relaxed font-sans">
+              Abre esta URL en la pantalla grande. Muestra la pregunta, el cronómetro y el marcador — sin controles del organizador.
+            </p>
+          </div>
+        </div>
+        <a
+          href="?role=pantalla"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="whitespace-nowrap px-5 py-2.5 border border-brand-gray/20 text-brand-gray hover:border-gold hover:text-gold text-[10px] font-semibold uppercase tracking-wider transition-all text-center"
+        >
+          Abrir Pantalla Pública &rarr;
+        </a>
       </div>
 
       {/* Session Diagnostics Info and Quick Clean Panel */}
