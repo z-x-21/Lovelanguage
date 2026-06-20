@@ -59,14 +59,10 @@ export function subscribeGameState(callback: (state: GameState | null) => void, 
   });
 }
 
-// 2. Initialize or Update Game State
+// 2. Initialize or Update Game State — throws on Firestore error so callers can handle/display it
 export async function updateGameState(update: Partial<GameState>) {
   const stateDocRef = doc(db, 'sessions', SESSION_DOC_ID);
-  try {
-    await setDoc(stateDocRef, update, { merge: true });
-  } catch (err) {
-    console.error('Error updating game state:', err);
-  }
+  await setDoc(stateDocRef, update, { merge: true });
 }
 
 // 3. Subscribe to Questions
@@ -90,11 +86,7 @@ export function subscribeQuestions(callback: (questions: Question[]) => void, on
 // 4. Save Questions to Firestore
 export async function saveQuestions(questions: Question[]) {
   const questionsDocRef = doc(db, 'sessions', SESSION_DOC_ID, 'setup', 'questions_data');
-  try {
-    await setDoc(questionsDocRef, { list: questions });
-  } catch (err) {
-    console.error('Error storing questions list:', err);
-  }
+  await setDoc(questionsDocRef, { list: questions });
 }
 
 // 5. Subscribe to Active Guests
@@ -118,20 +110,16 @@ export function subscribeGuests(callback: (guests: Guest[]) => void, onError?: (
   });
 }
 
-// 6. Join or Register Guest
+// 6. Join or Register Guest — throws on error so GuestBuzzer can show it
 export async function registerGuest(guestId: string, name: string) {
   const guestDocRef = doc(db, 'sessions', SESSION_DOC_ID, 'guests', guestId);
-  try {
-    await setDoc(guestDocRef, {
-      id: guestId,
-      name: name,
-      score: 0,
-      correctCount: 0,
-      joinedAt: Date.now()
-    }, { merge: true });
-  } catch (err) {
-    console.error('Could not register guest:', err);
-  }
+  await setDoc(guestDocRef, {
+    id: guestId,
+    name: name,
+    score: 0,
+    correctCount: 0,
+    joinedAt: Date.now()
+  }, { merge: true });
 }
 
 // 7. Submit Response and Record Velocity Score

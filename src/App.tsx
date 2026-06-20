@@ -29,7 +29,7 @@ import DisplayScreen from './components/DisplayScreen';
 
 export default function App() {
   // Read initial role from query parameter, hash, or pathname to keep screens independent
-  const getInitialRole = (): 'lobby' | 'couple' | 'host' | 'guest' | 'sandbox' | 'display' => {
+  const getInitialRole = (): 'lobby' | 'couple' | 'host' | 'guest' | 'display' => {
     if (typeof window === 'undefined') return 'lobby';
     const params = new URLSearchParams(window.location.search);
     const roleParam = params.get('role');
@@ -39,22 +39,17 @@ export default function App() {
     const normalized = roleParam || hashParam || pathParam;
     if (normalized === 'organizador' || normalized === 'host') return 'host';
     if (normalized === 'novios' || normalized === 'couple') return 'couple';
-    if (normalized === 'sandbox' || normalized === 'pruebas') return 'sandbox';
     if (normalized === 'admin' || normalized === 'lobby') return 'lobby';
     if (normalized === 'guest' || normalized === 'invitado') return 'guest';
     if (normalized === 'display' || normalized === 'pantalla' || normalized === 'tv') return 'display';
 
-    // Auto-resume if the guest already joined previously with a nickname
     const savedName = localStorage.getItem('wedding_trivia_guest_name');
-    if (savedName) {
-      return 'guest';
-    }
+    if (savedName) return 'guest';
 
-    // Default to 'lobby' so the user can choose their seat (Couple, Organizer, or Guest)
     return 'lobby';
   };
 
-  const [role, setRole] = React.useState<'lobby' | 'couple' | 'host' | 'guest' | 'sandbox' | 'display'>(getInitialRole);
+  const [role, setRole] = React.useState<'lobby' | 'couple' | 'host' | 'guest' | 'display'>(getInitialRole);
   
   // Database real-time values and connection diagnostic tracking
   const [gameState, setGameState] = React.useState<GameState | null>(null);
@@ -126,9 +121,15 @@ export default function App() {
     };
   }, []);
 
-  // Standard updates
+  // Standard updates — errors propagate so callers (HostConsole, CouplePanel) can display them
   const handleUpdateGameState = async (update: Partial<GameState>) => {
-    await updateGameState(update);
+    try {
+      await updateGameState(update);
+    } catch (err: any) {
+      console.error('updateGameState failed:', err);
+      setConnectionError(err?.code === 'permission-denied' ? 'permission-denied' : 'failed-to-connect');
+      throw err;
+    }
   };
 
   const handlePublishQuestions = async (newQuestions: Question[]) => {
@@ -175,8 +176,7 @@ export default function App() {
     );
   }
 
-  // Override: show LeaderboardPodium when completed — except sandbox (needs full control for testing)
-  if (safeState.status === 'completed' && role !== 'sandbox') {
+  if (safeState.status === 'completed') {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
         <LeaderboardPodium
@@ -258,74 +258,6 @@ export default function App() {
           />
         )}
 
-        {role === 'sandbox' && (
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <div className="text-center mb-6">
-              <div className="text-xs bg-indigo-100 text-indigo-800 border border-indigo-200 px-3 py-1 rounded-full inline-block font-semibold">
-                🔧 Modo de Pruebas Interactivo Activo (El panel izquierdo actúa como Organizador / El panel derecho actúa como Invitado Móvil)
-              </div>
-              <div className="flex items-center justify-center gap-4 mt-2">
-                <button
-                  onClick={() => setRole('lobby')}
-                  className="text-xs text-rose-500 hover:text-rose-700 underline font-bold cursor-pointer"
-                >
-                  Salir del Modo de Pruebas
-                </button>
-                {safeState.status === 'completed' && (
-                  <button
-                    onClick={async () => { await handleResetSession(); }}
-                    className="text-xs bg-gold text-brand-gray font-bold px-3 py-1 rounded hover:bg-gold-hover cursor-pointer"
-                  >
-                    ↺ Reiniciar Juego (Sandbox)
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {safeState.status === 'completed' ? (
-              <LeaderboardPodium
-                guests={guests}
-                onRestart={async () => { await handleResetSession(); }}
-              />
-            ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              {/* Host Controller Sidebar Left */}
-              <div className="lg:col-span-7 bg-white rounded-2xl shadow-lg border border-slate-200 p-2">
-                <div className="bg-slate-100 p-2.5 rounded-t-xl text-[10px] uppercase font-bold text-slate-400 tracking-wider text-center">
-                  VISTA A: Consola Central de Control del Organizador
-                </div>
-                <HostConsole
-                  onBackToMenu={() => setRole('lobby')}
-                  gameState={safeState}
-                  questions={questions}
-                  guests={guests}
-                  responses={responses}
-                  onUpdateState={handleUpdateGameState}
-                  onResetSession={handleResetSession}
-                  isSandbox={true}
-                />
-              </div>
-
-              {/* Guest Controller Sidebar Right */}
-              <div className="lg:col-span-5 bg-white rounded-2xl shadow-lg border border-slate-200 p-2 relative h-fit">
-                <div className="bg-rose-50 p-2.5 rounded-t-xl text-[10px] uppercase font-bold text-rose-450 tracking-wider text-center">
-                  VISTA B: Dispositivo Móvil del Invitado
-                </div>
-                <GuestBuzzer
-                  onBackToMenu={() => setRole('lobby')}
-                  gameState={safeState}
-                  questions={questions}
-                  guests={guests}
-                  responses={responses}
-                  onRegister={registerGuest}
-                  onSubmitAnswer={submitResponse}
-                  isSandbox={true}
-                />
-              </div>
-            </div>
-            )}
-          </div>
-        )}
       </main>
 
       <footer className="py-6 text-center text-[10px] text-slate-400 font-mono border-t border-slate-200/50 bg-white">

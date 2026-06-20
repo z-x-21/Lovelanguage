@@ -27,7 +27,6 @@ interface HostConsoleProps {
   responses: GuestResponse[];
   onUpdateState: (update: Partial<GameState>) => Promise<void>;
   onResetSession: () => Promise<void>;
-  isSandbox?: boolean;
 }
 
 export default function HostConsole({
@@ -38,7 +37,6 @@ export default function HostConsole({
   responses,
   onUpdateState,
   onResetSession,
-  isSandbox = false,
 }: HostConsoleProps) {
   const [timeLeft, setTimeLeft] = React.useState(0);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -154,14 +152,12 @@ export default function HostConsole({
       {/* Top Banner Host Control */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gold/30 pb-5 mb-6 gap-4">
         <div className="flex items-center space-x-3">
-          {!isSandbox && (
-            <button
-              onClick={onBackToMenu}
-              className="p-1.5 border border-brand-gray/10 hover:border-gold rounded-none text-brand-gray/60 hover:text-brand-gray transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          )}
+          <button
+            onClick={onBackToMenu}
+            className="p-1.5 border border-brand-gray/10 hover:border-gold rounded-none text-brand-gray/60 hover:text-brand-gray transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
           <div>
             <div className="flex items-center space-x-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse"></span>

@@ -23,7 +23,6 @@ interface GuestBuzzerProps {
     responseTimeMs: number,
     pointsEarned: number
   ) => Promise<void>;
-  isSandbox?: boolean;
 }
 
 export default function GuestBuzzer({
@@ -34,7 +33,6 @@ export default function GuestBuzzer({
   responses,
   onRegister,
   onSubmitAnswer,
-  isSandbox = false,
 }: GuestBuzzerProps) {
   // guestId initialized synchronously — avoids empty-string race condition on fast submits
   const [guestId] = React.useState<string>(() => {

@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { Heart, Crown, Tv, Smartphone, RefreshCw, Layers, ShieldAlert, Monitor } from 'lucide-react';
+import { Heart, Crown, Tv, Smartphone, RefreshCw, ShieldAlert, Monitor } from 'lucide-react';
 
 interface RoleSelectorProps {
-  onSelectRole: (role: 'couple' | 'host' | 'guest' | 'sandbox') => void;
+  onSelectRole: (role: 'couple' | 'host' | 'guest') => void;
   guestCount: number;
   questionCount: number;
   gameStatus: string;
@@ -22,11 +22,11 @@ export default function RoleSelector({
   onResetAll,
 }: RoleSelectorProps) {
   const [resetting, setResetting] = React.useState(false);
-  const [pendingRole, setPendingRole] = React.useState<'couple' | 'host' | 'sandbox' | null>(null);
+  const [pendingRole, setPendingRole] = React.useState<'couple' | 'host' | null>(null);
   const [passcode, setPasscode] = React.useState('');
   const [errorMsg, setErrorMsg] = React.useState('');
 
-  const trySelectRole = (r: 'couple' | 'host' | 'sandbox' | 'guest') => {
+  const trySelectRole = (r: 'couple' | 'host' | 'guest') => {
     if (r === 'guest') {
       onSelectRole('guest');
     } else {
@@ -140,32 +140,6 @@ export default function RoleSelector({
             Unirse como Invitado &rarr;
           </span>
         </button>
-      </div>
-
-      {/* Recommended Interactive Sandbox Option */}
-      <div className="bg-brand-gray text-white p-6 md:p-8 shadow-sm border border-gold/30 mb-8 overflow-hidden relative">
-        <div className="absolute right-0 top-0 w-32 h-32 bg-gold/10 rounded-full blur-2xl"></div>
-        <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="max-w-xl">
-            <div className="inline-flex items-center space-x-1.5 bg-gold/20 text-gold border border-gold/30 px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider mb-3">
-              <Layers className="w-3 h-3 text-gold" />
-              <span>Sugerido para Demostraciones y Pruebas</span>
-            </div>
-            <h2 className="font-serif text-2xl tracking-normal italic text-gold">
-              Modo de Pruebas Dual (Sandbox)
-            </h2>
-            <p className="mt-2 text-xs md:text-sm text-white/80 leading-relaxed font-sans">
-              ¿No tienes varios teléfonos para probar? Inicia el **Modo de Pruebas** para ver una pantalla dividida con la **Consola del Organizador** a la izquierda y el **Pulsador del Invitado** a la derecha de forma interactiva y simultánea.
-            </p>
-          </div>
-          <button
-            onClick={() => trySelectRole('sandbox')}
-            id="role_btn_sandbox"
-            className="whitespace-nowrap px-6 py-4 bg-gold text-brand-gray font-semibold text-[11px] uppercase tracking-[0.2em] shadow-sm hover:bg-gold-hover hover:scale-[1.02] active:scale-95 transition-all text-center cursor-pointer"
-          >
-            Iniciar Modo Pruebas
-          </button>
-        </div>
       </div>
 
       {/* Public Display Screen link */}
