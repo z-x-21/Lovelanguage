@@ -1,10 +1,9 @@
 {
-  "projectId": "kingslost-eab44",
-  "appId": "1:568892654133:web:477a5b22278bdbf507277c",
-  "apiKey": "AIzaSyC1AWiWfPQ6vlUZM93N7CPBzgGynBwpDQ0",
-  "authDomain": "kingslost-eab44.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-ae52d72c-3655-48f5-bfda-43e04f1461d6",
-  "storageBucket": "kingslost-eab44.firebasestorage.app",
-  "messagingSenderId": "568892654133",
-  "measurementId": ""
+  "projectId": "lovelanguage-c684c",
+  "appId": "1:611462784947:web:89335d48fc2666d7f5cdc6",
+  "apiKey": "AIzaSyCgCU-XXP50EvfY2WCNvP5tdlAPN8xtFiI",
+  "authDomain": "lovelanguage-c684c.firebaseapp.com",
+  "storageBucket": "lovelanguage-c684c.firebasestorage.app",
+  "messagingSenderId": "611462784947",
+  "measurementId": "G-K762VWQF5R"
 }
