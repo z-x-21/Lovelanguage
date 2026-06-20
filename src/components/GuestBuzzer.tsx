@@ -36,45 +36,49 @@ export default function GuestBuzzer({
   onSubmitAnswer,
   isSandbox = false,
 }: GuestBuzzerProps) {
-  // Guest local registration state
-  const [guestId, setGuestId] = React.useState('');
-  const [guestName, setGuestName] = React.useState('');
-  const [isRegistered, setIsRegistered] = React.useState(false);
-  const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
-  const [questionTriggerTime, setQuestionTriggerTime] = React.useState<number | null>(null);
-  const [pointsWagered, setPointsWagered] = React.useState(0);
-
-  // Auto-generate a guestId if none exists
-  React.useEffect(() => {
+  // guestId initialized synchronously — avoids empty-string race condition on fast submits
+  const [guestId] = React.useState<string>(() => {
     let localId = localStorage.getItem('wedding_trivia_guest_id');
-    const localName = localStorage.getItem('wedding_trivia_guest_name');
     if (!localId) {
       localId = 'guest_' + Math.random().toString(36).substring(2, 11);
       localStorage.setItem('wedding_trivia_guest_id', localId);
     }
-    setGuestId(localId);
-    if (localName) {
-      setGuestName(localName);
-    }
-  }, []);
+    return localId;
+  });
+  const [guestName, setGuestName] = React.useState<string>(
+    () => localStorage.getItem('wedding_trivia_guest_name') || ''
+  );
+  const [isRegistered, setIsRegistered] = React.useState(false);
+  const [registering, setRegistering] = React.useState(false);
+  const [registerError, setRegisterError] = React.useState('');
+  const [selectedOption, setSelectedOption] = React.useState<string | null>(null);
+  const [questionTriggerTime, setQuestionTriggerTime] = React.useState<number | null>(null);
+  const [pointsWagered, setPointsWagered] = React.useState(0);
 
   // Sync state: if new question is activated, unlock local answer options
   React.useEffect(() => {
     if (gameState.questionActive && gameState.timerEndAt) {
-      // Calculate when the question actually started
       const startTime = gameState.timerEndAt - (gameState.timerDuration * 1000);
       setQuestionTriggerTime(startTime);
-      setSelectedOption(null); // Reset for new question
+      setSelectedOption(null);
     }
   }, [gameState.currentQuestionIndex, gameState.questionActive, gameState.timerEndAt]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!guestName.trim()) return;
-
-    localStorage.setItem('wedding_trivia_guest_name', guestName.trim());
-    await onRegister(guestId, guestName.trim());
-    setIsRegistered(true);
+    const trimmedName = guestName.trim();
+    if (!trimmedName) return;
+    setRegistering(true);
+    setRegisterError('');
+    try {
+      localStorage.setItem('wedding_trivia_guest_name', trimmedName);
+      await onRegister(guestId, trimmedName);
+      setIsRegistered(true);
+    } catch (err: any) {
+      console.error('Registration failed:', err);
+      setRegisterError('No se pudo conectar. Verifica tu internet e intenta de nuevo.');
+      setRegistering(false);
+    }
   };
 
   const activeQuestion = questions[gameState.currentQuestionIndex] || null;
@@ -102,9 +106,10 @@ export default function GuestBuzzer({
     if (isCorrect) {
       const basePoints = 1000;
       // Bonus points scales lineary up to +500 points for an instant 0s buzz-in
+      const timerMs = (gameState.timerDuration || 20) * 1000;
       const velocityBonus = Math.max(
         0,
-        Math.round(((20000 - Math.min(20000, responseTimeMs)) / 20000) * 500)
+        Math.round(((timerMs - Math.min(timerMs, responseTimeMs)) / timerMs) * 500)
       );
       points = basePoints + velocityBonus;
     }
@@ -161,21 +166,30 @@ export default function GuestBuzzer({
               </div>
             </div>
 
+            {registerError && (
+              <p className="text-[10px] text-rose-500 font-semibold text-center animate-fade-in">
+                ⚠ {registerError}
+              </p>
+            )}
+
             <button
               type="submit"
               id="btn_guest_join_submit"
-              className="w-full py-4 bg-brand-gray hover:bg-gold hover:text-brand-gray text-white font-semibold text-[11px] uppercase tracking-[0.2em] transition-colors shadow-sm cursor-pointer"
+              disabled={registering}
+              className="w-full py-4 bg-brand-gray hover:bg-gold hover:text-brand-gray text-white font-semibold text-[11px] uppercase tracking-[0.2em] transition-colors shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Entrar al Juego &rarr;
+              {registering ? 'Conectando...' : 'Entrar al Juego →'}
             </button>
           </form>
 
-          <button
-            onClick={onBackToMenu}
-            className="mt-6 text-[10px] text-brand-gray/40 hover:text-brand-gray/70 underline tracking-widest uppercase cursor-pointer block mx-auto"
-          >
-            Volver a la selección de roles
-          </button>
+          {isSandbox && (
+            <button
+              onClick={onBackToMenu}
+              className="mt-6 text-[10px] text-brand-gray/40 hover:text-brand-gray/70 underline tracking-widest uppercase cursor-pointer block mx-auto"
+            >
+              Volver a la selección de roles
+            </button>
+          )}
         </div>
       </div>
     );
@@ -331,15 +345,16 @@ export default function GuestBuzzer({
         )}
       </div>
 
-      {/* Back button menu out of play */}
-      <div className="mt-4 pt-3 flex items-center justify-center text-xs pb-4">
-        <button
-          onClick={onBackToMenu}
-          className="text-brand-gray/40 hover:text-brand-gray/70 underline underline-offset-4 decoration-gold/40 tracking-wider font-semibold uppercase text-[9px] cursor-pointer"
-        >
-          {isSandbox ? "Salir de la Sala (Modo Sandbox)" : "Cambiar de Rol / Menú Principal"}
-        </button>
-      </div>
+      {isSandbox && (
+        <div className="mt-4 pt-3 flex items-center justify-center text-xs pb-4">
+          <button
+            onClick={onBackToMenu}
+            className="text-brand-gray/40 hover:text-brand-gray/70 underline underline-offset-4 decoration-gold/40 tracking-wider font-semibold uppercase text-[9px] cursor-pointer"
+          >
+            Salir de la Sala (Modo Sandbox)
+          </button>
+        </div>
+      )}
     </div>
   );
 }
