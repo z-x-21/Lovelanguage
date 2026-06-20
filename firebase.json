@@ -1,5 +1,9 @@
 {
   "firestore": {
     "rules": "firestore.rules"
+  },
+  "apphosting": {
+    "backendId": "lovelanguage",
+    "region": "us-central1"
   }
 }
