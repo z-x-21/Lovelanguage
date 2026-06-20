@@ -1,0 +1,6 @@
+{
+  "name": "Wedding Quiz Architect & Guest Console",
+  "description": "AI-powered real-time wedding trivia game with couples' validation, host master console, dynamic 20s timers, real-time analytics, and scoreboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "Session": {
+      "title": "Session",
+      "description": "Global coordination of the wedding party game state",
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "currentQuestionIndex": {
+          "type": "integer"
+        },
+        "timerDuration": {
+          "type": "integer"
+        },
+        "timerEndAt": {
+          "type": "integer"
+        },
+        "questionActive": {
+          "type": "boolean"
+        },
+        "showResults": {
+          "type": "boolean"
+        }
+      }
+    },
+    "SetupData": {
+      "title": "SetupData",
+      "description": "The custom drafted questions list",
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array"
+        }
+      }
+    },
+    "Guest": {
+      "title": "Guest",
+      "description": "Guests registered to play the wedding trivia",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "score": {
+          "type": "integer"
+        },
+        "correctCount": {
+          "type": "integer"
+        },
+        "joinedAt": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "score",
+        "correctCount",
+        "joinedAt"
+      ]
+    },
+    "Response": {
+      "title": "Response",
+      "description": "Answers submitted by guests in real time",
+      "type": "object",
+      "properties": {
+        "guestId": {
+          "type": "string"
+        },
+        "guestName": {
+          "type": "string"
+        },
+        "questionId": {
+          "type": "integer"
+        },
+        "selectedOption": {
+          "type": "string"
+        },
+        "isCorrect": {
+          "type": "boolean"
+        },
+        "responseTimeMs": {
+          "type": "integer"
+        },
+        "pointsEarned": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "guestId",
+        "guestName",
+        "questionId",
+        "selectedOption",
+        "isCorrect",
+        "responseTimeMs",
+        "pointsEarned",
+        "timestamp"
+      ]
+    }
+  },
+  "firestore": {
+    "/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "Main global wedding sessions"
+    },
+    "/sessions/{sessionId}/setup/{setupId}": {
+      "schema": "SetupData",
+      "description": "Setup questions data"
+    },
+    "/sessions/{sessionId}/guests/{guestId}": {
+      "schema": "Guest",
+      "description": "Participating guests list"
+    },
+    "/sessions/{sessionId}/responses/{responseId}": {
+      "schema": "Response",
+      "description": "Guest answers stream"
+    }
+  }
+}

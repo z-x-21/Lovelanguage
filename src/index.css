@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --color-gold: #D4AF37;
+  --color-gold-hover: #C5A028;
+  --color-brand-gray: #2D2D2D;
+  --color-ivory: #FDFCFB;
+  --color-blush: #E8D3D3;
+}
+
+/* Custom wedding pulse animations and keyframes */
+@keyframes heartPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.95;
+  }
+}
+
+.animate-heart-pulse {
+  animation: heartPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes ringRotate {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.animate-ring-tilt {
+  animation: ringRotate 2.5s infinite ease-in-out;
+}
+
+@keyframes wave-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(244, 63, 94, 0.5);
+  }
+}
+
+.live-pulse-glow {
+  animation: wave-glow 2s infinite ease-in-out;
+}
+
