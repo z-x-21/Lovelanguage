@@ -174,28 +174,29 @@ export default function CouplePanel({
   });
 
   const [questions, setQuestions] = React.useState<Question[]>(() => {
+    // Firestore questions (authoritative) take priority over localStorage drafts
+    if (savedQuestions.length > 0) return savedQuestions;
     const draft = localStorage.getItem('wedding_trivia_draft_questions');
     if (draft) {
       try {
         const parsed = JSON.parse(draft);
         if (parsed && parsed.length > 0) return parsed;
-      } catch (e) {
-        // Fallback
-      }
+      } catch (e) { /* ignore */ }
     }
-    return savedQuestions.length > 0 ? savedQuestions : [];
+    return [];
   });
 
-  // Keep draft biography and generated questions in sync with localStorage automatically
+  // Sync from Firestore when savedQuestions updates (e.g. after reset)
+  React.useEffect(() => {
+    if (savedQuestions.length > 0) {
+      setQuestions(savedQuestions);
+    }
+  }, [savedQuestions]);
+
+  // Keep draft biography in sync with localStorage
   React.useEffect(() => {
     localStorage.setItem('wedding_trivia_draft_bio', JSON.stringify(bio));
   }, [bio]);
-
-  React.useEffect(() => {
-    if (questions.length > 0) {
-      localStorage.setItem('wedding_trivia_draft_questions', JSON.stringify(questions));
-    }
-  }, [questions]);
   const [loadingQuestions, setLoadingQuestions] = React.useState(false);
   const [loadingDistractors, setLoadingDistractors] = React.useState<Record<number, boolean>>({});
   const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved'>('idle');
