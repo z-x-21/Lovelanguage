@@ -140,11 +140,11 @@ export default function CouplePanel({
       }
     }
     return {
-      brideName: 'Raquel',
-      groomName: 'Alejandro',
-      howWeMet: 'Nos tropezamos en un parque de perros por la tarde cuando nuestros golden retrievers enredaron sus correas, provocando cafés derramados y muchas risas.',
-      funnyAnecdote: 'Alejandro intentó hacer un soufflé casero para Raquel en su primer aniversario. Se desinfló por completo a los 30 segundos de salir del horno, por lo que terminamos comiendo palomitas de microondas y pizza fría.',
-      coupleBiographyText: 'Raquel es diseñadora de interiores, le encanta la alfarería y la comida picante. Alejandro es programador de software, disfruta del senderismo, toca la guitarra acústica desafinada y siempre pierde su teléfono.'
+      brideName: 'Ceci',
+      groomName: 'Rafael',
+      howWeMet: 'Nos conocimos en la secundaria. Rafael vivía en su propio mundo de anime, música y videojuegos. Me dejaste entrar en tu mundo y me enseñaste que la magia se descubre si pones atención. Todavía guardo la carta y el dibujo que me hiciste en aquellos tiempos.',
+      funnyAnecdote: 'Una vez Ceci no quería ir al trabajo. Rafael la cargó hasta los torniquetes del metro insistiendo en que sí fueran. Justo antes de cruzar, Ceci dijo con tono muy serio: "No puedo ir a trabajar." Rafael preocupado preguntó por qué, y ella respondió: "Porque traigo tenis." Se quedaron viéndose serios y se rieron muchísimo. Terminaron yendo a comer a un restaurante italiano.',
+      coupleBiographyText: 'Rafael Robles Pimienta y Ana Cecilia Falcon Missett. Hobbies compartidos: juegos de mesa, cine de terror (Midsommar, Hereditary, Pearl, Boda Sangrienta), rock alternativo e indie, restaurantes de espadas y buffets, platicar sobre la vida, días lluviosos con sus perritos escuchando música, series (La Maldición de Hill House, Demon Slayer, Desafío sobre Fuego). Al principio eran muy diferentes pero esas diferencias los convirtieron en el equipo que son hoy.'
     };
   });
 

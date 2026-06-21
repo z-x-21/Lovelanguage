@@ -22,25 +22,97 @@ import { GameState, Question, Guest, GuestResponse } from '../types';
 // Let's use a single global session document to coordinate everyone instantly
 const SESSION_DOC_ID = 'main_wedding_party';
 
-// Initial default questions to display immediately if they haven't generated any yet
+// Preguntas reales de Rafael Robles Pimienta & Ana Cecilia Falcon Missett
 export const DEFAULT_LOBBY_QUESTIONS: Question[] = [
   {
     id: 1,
-    questionText: "¿Dónde tuvieron los novios su primera cita?",
-    correctAnswer: "Un acogedor bistró italiano",
-    options: ["Un acogedor bistró italiano", "Un bar deportivo ruidoso", "En una estación de metro llena de gente", "Durante una clase en línea por Zoom"]
+    questionText: "¿En qué lugar se conocieron Rafael y Ceci por primera vez?",
+    correctAnswer: "En la secundaria",
+    options: ["En la secundaria", "En la universidad", "En un concierto de rock", "En un restaurante"]
   },
   {
     id: 2,
-    questionText: "¿Quién suele decir 'Te amo' primero con más frecuencia?",
-    correctAnswer: "La Novia",
-    options: ["La Novia", "El Novio", "Lo dijeron exactamente al mismo segundo", "Ninguno, lo demuestran lavando los platos"]
+    questionText: "¿En qué universo vivía Rafael cuando Ceci lo conoció?",
+    correctAnswer: "Anime, música y videojuegos",
+    options: ["Anime, música y videojuegos", "Fútbol y natación", "Lectura y cocina", "Ciclismo y fotografía"]
   },
   {
     id: 3,
-    questionText: "¿A dónde irá la pareja de luna de miel?",
-    correctAnswer: "Un resort de playa tropical",
-    options: ["Un resort de playa tropical", "Un viaje de mochileros a la montaña", "Un recorrido cultural de museos", "Un retiro forestal silencioso y sin conexión"]
+    questionText: "¿Qué detalle especial le regaló Rafael a Ceci en la secundaria?",
+    correctAnswer: "Una carta y un dibujo",
+    options: ["Una carta y un dibujo", "Un ramo de flores", "Un libro de poesía", "Un peluche de anime"]
+  },
+  {
+    id: 4,
+    questionText: "¿Qué tipo de películas une más a Rafael y Ceci?",
+    correctAnswer: "Terror psicológico",
+    options: ["Terror psicológico", "Comedias románticas", "Documentales de naturaleza", "Acción y superhéroes"]
+  },
+  {
+    id: 5,
+    questionText: "¿Cuál es el género musical favorito de la pareja?",
+    correctAnswer: "Rock alternativo e indie",
+    options: ["Rock alternativo e indie", "Reggaeton y cumbia", "Pop en español", "Jazz y blues"]
+  },
+  {
+    id: 6,
+    questionText: "¿Qué hacen Rafael y Ceci en un día lluvioso perfecto?",
+    correctAnswer: "Acostados con sus perritos escuchando música",
+    options: ["Acostados con sus perritos escuchando música", "Ver fútbol con amigos", "Cocinar recetas nuevas juntos", "Jugar videojuegos en competencia"]
+  },
+  {
+    id: 7,
+    questionText: "¿Qué actividad eligen cuando quieren pasar tiempo juntos en casa?",
+    correctAnswer: "Juegos de mesa",
+    options: ["Juegos de mesa", "Videojuegos competitivos", "Cartas y póker", "Trivias en línea"]
+  },
+  {
+    id: 8,
+    questionText: "¿Cuál es la serie de terror que más les gusta a los dos?",
+    correctAnswer: "La Maldición de Hill House",
+    options: ["La Maldición de Hill House", "Stranger Things", "American Horror Story", "The Haunting of Bly Manor"]
+  },
+  {
+    id: 9,
+    questionText: "¿Qué tipo de restaurantes son los favoritos de Rafael y Ceci?",
+    correctAnswer: "Restaurantes de espadas y buffets",
+    options: ["Restaurantes de espadas y buffets", "Sushi y comida japonesa", "Taquerías y antojitos", "Pizzerías italianas"]
+  },
+  {
+    id: 10,
+    questionText: "¿Cuál fue la razón de Ceci para no poder entrar al trabajo aquella mañana?",
+    correctAnswer: "Traía tenis",
+    options: ["Traía tenis", "Se le olvidó la credencial", "El metro estaba lleno", "Había olvidado desayunar"]
+  },
+  {
+    id: 11,
+    questionText: "¿Qué hizo Rafael cuando Ceci dijo que quería irse de pinta?",
+    correctAnswer: "La cargó hasta los torniquetes del metro",
+    options: ["La cargó hasta los torniquetes del metro", "Se regresó a casa con ella", "La convenció de quedarse en cama", "Le compró un café para animarla"]
+  },
+  {
+    id: 12,
+    questionText: "¿A dónde fueron Rafael y Ceci después del incidente de los tenis?",
+    correctAnswer: "A comer a un restaurante italiano",
+    options: ["A comer a un restaurante italiano", "Al parque con sus perritos", "Al cine a ver terror", "A casa a descansar todo el día"]
+  },
+  {
+    id: 13,
+    questionText: "¿Cuál es el anime favorito que comparte la pareja?",
+    correctAnswer: "Demon Slayer",
+    options: ["Demon Slayer", "Dragon Ball Z", "Naruto Shippuden", "Attack on Titan"]
+  },
+  {
+    id: 14,
+    questionText: "Según los votos de Ceci, ¿qué le enseñó Rafael con su mundo de anime y música?",
+    correctAnswer: "Que la magia se descubre si pones atención",
+    options: ["Que la magia se descubre si pones atención", "Que el amor es cuestión de suerte", "Que los opuestos siempre se atraen", "Que el tiempo lo cura todo"]
+  },
+  {
+    id: 15,
+    questionText: "¿Cómo define Ceci en sus votos la diferencia entre ella y Rafael?",
+    correctAnswer: "Diferentes que se volvieron un equipo",
+    options: ["Diferentes que se volvieron un equipo", "Idénticos en todo desde el principio", "Opuestos que nunca cambiaron", "Parecidos desde que se conocieron"]
   }
 ];
 
