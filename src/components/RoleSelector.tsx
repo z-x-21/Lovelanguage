@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Heart, Crown, Tv, Smartphone, RefreshCw, ShieldAlert, Monitor } from 'lucide-react';
+import { Heart, Crown, Tv, Smartphone, RefreshCw, Monitor } from 'lucide-react';
 
 interface RoleSelectorProps {
   onSelectRole: (role: 'couple' | 'host' | 'guest') => void;
@@ -22,31 +22,9 @@ export default function RoleSelector({
   onResetAll,
 }: RoleSelectorProps) {
   const [resetting, setResetting] = React.useState(false);
-  const [pendingRole, setPendingRole] = React.useState<'couple' | 'host' | null>(null);
-  const [passcode, setPasscode] = React.useState('');
-  const [errorMsg, setErrorMsg] = React.useState('');
 
   const trySelectRole = (r: 'couple' | 'host' | 'guest') => {
-    if (r === 'guest') {
-      onSelectRole('guest');
-    } else {
-      setPendingRole(r);
-      setPasscode('');
-      setErrorMsg('');
-    }
-  };
-
-  const verifyPasscode = (e: React.FormEvent) => {
-    e.preventDefault();
-    const clean = passcode.trim().toLowerCase();
-    if (clean === 'boda123' || clean === 'boda2026' || clean === 'novios' || clean === 'novios2026') {
-      if (pendingRole) {
-        onSelectRole(pendingRole);
-        setPendingRole(null);
-      }
-    } else {
-      setErrorMsg('Contraseña incorrecta. Por favor intenta de nuevo.');
-    }
+    onSelectRole(r);
   };
 
   const handleReset = async () => {
@@ -195,67 +173,6 @@ export default function RoleSelector({
         </button>
       </div>
 
-      {/* Passcode Protection Modal overlay */}
-      {pendingRole !== null && (
-        <div className="fixed inset-0 bg-brand-gray/80 backdrop-blur-sm z-55 flex items-center justify-center p-4">
-          <div className="bg-white border border-gold/40 p-6 md:p-8 max-w-sm w-full shadow-2xl relative text-center">
-            
-            <div className="w-12 h-12 bg-gold/10 border border-gold/30 rounded-full flex items-center justify-center mx-auto text-gold mb-4">
-              <ShieldAlert className="w-6 h-6 animate-pulse" />
-            </div>
-
-            <h3 className="font-serif text-xl italic font-semibold text-brand-gray">
-              Acceso Protegido
-            </h3>
-            <p className="text-xs text-brand-gray/70 mt-2 leading-relaxed">
-              Esta sección es de acceso privado para la pareja u organizadores del evento. Ingresa la contraseña de administración para continuar:
-            </p>
-
-            <form onSubmit={verifyPasscode} className="mt-6 space-y-4 text-left">
-              <div>
-                <label className="block text-[8px] uppercase tracking-widest font-bold text-[#D4AF37] mb-1.5">
-                  Contraseña de Administrador
-                </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Escribe la contraseña..."
-                  value={passcode}
-                  onChange={(e) => setPasscode(e.target.value)}
-                  className="w-full bg-[#FDFCFB]/50 border border-gold/20 rounded-none py-3 px-3 text-xs font-semibold focus:outline-none focus:border-gold focus:bg-white placeholder-brand-gray/30 transition-all text-center tracking-widest text-brand-gray"
-                  autoFocus
-                />
-              </div>
-
-              {errorMsg && (
-                <p className="text-[10px] text-rose-500 font-semibold text-center font-sans animate-bounce">
-                  {errorMsg}
-                </p>
-              )}
-
-              <div className="bg-[#FDFCFB] border border-gold/20 p-3 text-[10px] text-brand-gray/60 leading-relaxed rounded-none font-sans mt-2">
-                📌 <strong className="text-gold font-semibold uppercase">Prueba rápida:</strong> Usa la clave por defecto <span className="underline select-all font-semibold font-mono text-brand-gray bg-slate-100 px-1 py-0.5">boda123</span> para entrar de inmediato.
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setPendingRole(null)}
-                  className="py-3 border border-brand-gray/15 hover:bg-slate-50 text-brand-gray text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="py-3 bg-brand-gray hover:bg-gold hover:text-brand-gray text-white text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  Verificar &rarr;
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

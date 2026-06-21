@@ -53,6 +53,26 @@ export default function GuestBuzzer({
   const [questionTriggerTime, setQuestionTriggerTime] = React.useState<number | null>(null);
   const [pointsWagered, setPointsWagered] = React.useState(0);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [timeLeft, setTimeLeft] = React.useState(0);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  // Countdown timer synced with server timerEndAt
+  React.useEffect(() => {
+    if (gameState.questionActive && gameState.timerEndAt) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      const tick = () => {
+        const diff = Math.max(0, Math.ceil((gameState.timerEndAt! - Date.now()) / 1000));
+        setTimeLeft(diff);
+        if (diff <= 0 && timerRef.current) clearInterval(timerRef.current);
+      };
+      tick();
+      timerRef.current = setInterval(tick, 300);
+    } else {
+      setTimeLeft(0);
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [gameState.questionActive, gameState.timerEndAt]);
 
   // Sync state: if new question is activated, unlock local answer options
   React.useEffect(() => {
@@ -242,7 +262,19 @@ export default function GuestBuzzer({
         ) : gameState.questionActive && !hasSubmitted ? (
           /* Case C: Four-Quadrant Mobile Grid layouts active */
           <div className="w-full space-y-4">
-            <div className="text-center mb-2">
+            {/* Timer prominente para adultos mayores */}
+            <div className={`flex items-center justify-center gap-3 py-3 rounded-none border ${timeLeft <= 5 ? 'bg-rose-50 border-rose-300 animate-pulse' : 'bg-gold/10 border-gold/40'}`}>
+              <span className={`font-mono font-black tabular-nums leading-none ${timeLeft <= 5 ? 'text-rose-600 text-6xl' : 'text-gold text-5xl'}`}>
+                {timeLeft}
+              </span>
+              <div className="text-left">
+                <p className={`text-xs font-bold uppercase tracking-widest ${timeLeft <= 5 ? 'text-rose-500' : 'text-gold'}`}>
+                  {timeLeft <= 5 ? '¡APÚRATE!' : 'segundos'}
+                </p>
+                <p className="text-[10px] text-brand-gray/50 font-sans">para responder</p>
+              </div>
+            </div>
+            <div className="text-center">
               <div className="text-xs uppercase font-semibold text-gold tracking-widest flex items-center justify-center space-x-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>¡Responde rápido para mayor bonificación!</span>

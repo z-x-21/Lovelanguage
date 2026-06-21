@@ -303,13 +303,51 @@ export default function CouplePanel({
     setLoadingDistractors(prev => ({ ...prev, [questionId]: false }));
   };
 
-  // Quick helper to auto-generate distractors for ALL questions in a single button click (Highly popular for quick setups)
+  // Genera opciones para todas y auto-publica en Firestore al terminar
   const [bulkGenerating, setBulkGenerating] = React.useState(false);
   const handleBulkGenerateDistractors = async () => {
     if (questions.length === 0) return;
     setBulkGenerating(true);
-    for (const q of questions) {
-      await handleGenerateDistractors(q.id);
+    const geminiKey = getGeminiKey();
+    let updatedQuestions = [...questions];
+
+    for (let i = 0; i < updatedQuestions.length; i++) {
+      const q = updatedQuestions[i];
+      if (!q.correctAnswer.trim()) continue;
+      setLoadingDistractors(prev => ({ ...prev, [q.id]: true }));
+
+      let distractors: string[] | null = null;
+      if (geminiKey) {
+        try { distractors = await geminiGenerateDistractors(geminiKey, q.questionText, q.correctAnswer); } catch {}
+      }
+      if (!distractors) {
+        try {
+          const res = await fetch('/api/generate-distractors', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionText: q.questionText, correctAnswer: q.correctAnswer }),
+            signal: AbortSignal.timeout(10000)
+          });
+          if (res.ok) { const data = await res.json(); distractors = data.distractors; }
+        } catch {}
+      }
+      if (!distractors || distractors.length < 3) {
+        distractors = getSmartDistractors(q.correctAnswer, q.questionText, bio.brideName, bio.groomName);
+      }
+      updatedQuestions[i] = { ...q, options: shuffleArray([q.correctAnswer, ...distractors.slice(0, 3)]) };
+      setLoadingDistractors(prev => ({ ...prev, [q.id]: false }));
+    }
+
+    setQuestions(updatedQuestions);
+
+    // Auto-publicar en Firestore
+    setSaveStatus('saving');
+    try {
+      await onPublishQuestions(updatedQuestions);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (e) {
+      console.error('Auto-publish failed:', e);
+      setSaveStatus('idle');
     }
     setBulkGenerating(false);
   };
@@ -593,21 +631,6 @@ export default function CouplePanel({
             ))}
           </div>
 
-          {/* Published CTA banner at bottom */}
-          <div className="bg-brand-gray border border-gold/30 p-8 text-center text-white">
-            <h4 className="font-serif text-xl italic text-gold">¿Terminaron de personalizar su trivia de bodas?</h4>
-            <p className="text-xs text-white/75 mt-2 max-w-lg mx-auto leading-relaxed">
-              Al publicar el juego de preguntas oficial de su unión, el Organizador podrá cargarlas en su consola para coordinar el evento, y todos los asistentes responderán desde sus dispositivos en vivo.
-            </p>
-            <button
-              onClick={handleSaveToFirestore}
-              id="btn_publish_bottom"
-              className="mt-6 inline-flex items-center space-x-2 bg-white hover:bg-gold text-brand-gray font-semibold text-[11px] uppercase tracking-[0.2em] px-8 py-3.5 transition-colors cursor-pointer"
-            >
-              <Save className="w-4 h-4 mr-1 text-gold" />
-              <span>Publicar Juego Oficial</span>
-            </button>
-          </div>
         </div>
       )}
     </div>
