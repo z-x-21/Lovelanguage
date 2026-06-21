@@ -60,7 +60,10 @@ export default function DisplayScreen({ gameState, questions, guests, responses,
           <span className="text-slate-400">invitados conectados</span>
         </div>
         <p className="mt-10 text-sm text-slate-500">
-          Únete con tu celular en: <span className="text-gold font-semibold">?role=invitado</span>
+          Únete con tu celular en:{' '}
+          <span className="text-gold font-semibold font-mono text-base">
+            {typeof window !== 'undefined' ? window.location.origin : ''}<wbr />/?role=invitado
+          </span>
         </p>
       </div>
     );

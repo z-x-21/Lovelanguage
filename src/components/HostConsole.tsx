@@ -39,6 +39,7 @@ export default function HostConsole({
   onResetSession,
 }: HostConsoleProps) {
   const [timeLeft, setTimeLeft] = React.useState(0);
+  const [isLaunching, setIsLaunching] = React.useState(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const activeQuestion = questions[gameState.currentQuestionIndex] || null;
@@ -80,18 +81,20 @@ export default function HostConsole({
 
   // Handle manual trigger of the 20-second active response window
   const handleTriggerTimer = async () => {
-    if (!activeQuestion) return;
-
+    if (!activeQuestion || isLaunching) return;
+    setIsLaunching(true);
     const timerDurationMs = (gameState.timerDuration || 20) * 1000;
     const timerEndAt = Date.now() + timerDurationMs;
-
-    // Reset current active question's status to accept new inputs
-    await onUpdateState({
-      status: 'active',
-      questionActive: true,
-      showResults: false,
-      timerEndAt: timerEndAt,
-    });
+    try {
+      await onUpdateState({
+        status: 'active',
+        questionActive: true,
+        showResults: false,
+        timerEndAt: timerEndAt,
+      });
+    } finally {
+      setIsLaunching(false);
+    }
   };
 
   // Skip or advance question index
@@ -176,7 +179,7 @@ export default function HostConsole({
           </div>
 
           <button
-            onClick={onResetSession}
+            onClick={() => { if (window.confirm('¿Reiniciar la fiesta? Esto borrará todos los scores e invitados registrados.')) onResetSession(); }}
             id="btn_reset_active_game"
             className="px-3.5 py-1.5 border border-brand-gray/15 hover:bg-blush/20 text-brand-gray/70 hover:text-brand-gray font-sans text-[10px] uppercase tracking-widest transition-all cursor-pointer"
           >
@@ -235,7 +238,7 @@ export default function HostConsole({
                         stroke="#D4AF37" 
                         strokeWidth="4" 
                         strokeDasharray="301.6" 
-                        strokeDashoffset={gameState.questionActive ? (301.6 - (301.6 * timeLeft) / 20) : 301.6}
+                        strokeDashoffset={gameState.questionActive ? (301.6 - (301.6 * timeLeft) / (gameState.timerDuration || 20)) : 301.6}
                         className="transition-all duration-300"
                       />
                     </svg>
@@ -332,7 +335,7 @@ export default function HostConsole({
                   {/* Trigger Clock */}
                   <button
                     onClick={handleTriggerTimer}
-                    disabled={gameState.questionActive}
+                    disabled={gameState.questionActive || isLaunching}
                     id="btn_host_launch_buzzer"
                     className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-2 px-6 py-3.5 bg-brand-gray hover:bg-gold hover:text-brand-gray text-white font-semibold text-[11px] uppercase tracking-[0.2em] transition-colors disabled:opacity-50 cursor-pointer"
                   >
