@@ -5,7 +5,118 @@
 
 import React from 'react';
 import { Sparkles, Save, Heart, Sparkle, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { GoogleGenAI, Type } from '@google/genai';
 import { Question, CoupleBio } from '../types';
+
+// ── Client-side AI helpers (browser-safe) ────────────────────────────────────
+
+function getGeminiKey(): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const k = ((import.meta as any).env ?? {})['VITE_GEMINI_API_KEY'] as string | undefined;
+  return k && k !== 'MY_GEMINI_API_KEY' && k.trim() !== '' ? k : null;
+}
+
+async function geminiGenerateQuestions(apiKey: string, bio: CoupleBio) {
+  const ai = new GoogleGenAI({ apiKey });
+  const prompt = `Crea exactamente 15 preguntas de trivia de boda personalizadas COMPLETAMENTE EN ESPAÑOL.
+Novia: ${bio.brideName || 'La Novia'}, Novio: ${bio.groomName || 'El Novio'}
+Cómo se conocieron: ${bio.howWeMet}
+Anécdota graciosa: ${bio.funnyAnecdote}
+Datos adicionales: ${bio.coupleBiographyText}
+Cada respuesta debe ser corta (1–6 palabras). Genera exactamente 15.`;
+  const res = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            id: { type: Type.INTEGER },
+            questionText: { type: Type.STRING },
+            suggestedCorrectAnswer: { type: Type.STRING }
+          },
+          required: ['id', 'questionText', 'suggestedCorrectAnswer']
+        }
+      }
+    }
+  });
+  return JSON.parse(res.text) as Array<{id: number; questionText: string; suggestedCorrectAnswer: string}>;
+}
+
+async function geminiGenerateDistractors(apiKey: string, questionText: string, correctAnswer: string): Promise<string[]> {
+  const ai = new GoogleGenAI({ apiKey });
+  const prompt = `Crea exactamente 3 respuestas incorrectas (distractores) graciosas y plausibles EN ESPAÑOL para esta pregunta de trivia de boda.
+Pregunta: "${questionText}"
+Respuesta correcta: "${correctAnswer}"
+Los distractores deben sonar reales pero ser claramente incorrectos. JSON: {"distractors": ["...", "...", "..."]}`;
+  const res = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: { distractors: { type: Type.ARRAY, items: { type: Type.STRING } } },
+        required: ['distractors']
+      }
+    }
+  });
+  return (JSON.parse(res.text) as {distractors: string[]}).distractors;
+}
+
+function getClientFallbackQuestions(bride: string, groom: string, howWeMet: string, anecdote: string) {
+  const metShort = howWeMet.slice(0, 60) || 'una historia especial';
+  const anecShort = anecdote.slice(0, 60) || 'un momento inolvidable';
+  return [
+    { id: 1,  questionText: `¿Quién dio el primer paso para iniciar la relación de ${bride} y ${groom}?`,      suggestedCorrectAnswer: bride },
+    { id: 2,  questionText: `¿Cómo describirías en pocas palabras cómo se conocieron ${bride} y ${groom}?`,    suggestedCorrectAnswer: metShort },
+    { id: 3,  questionText: `¿Quién de los dos madruga más los fines de semana?`,                              suggestedCorrectAnswer: groom },
+    { id: 4,  questionText: `¿Quién elige la película cuando ven cine en casa?`,                               suggestedCorrectAnswer: bride },
+    { id: 5,  questionText: `¿Quién es el chef principal en casa?`,                                           suggestedCorrectAnswer: bride },
+    { id: 6,  questionText: `¿Cuál es el postre favorito de la pareja?`,                                      suggestedCorrectAnswer: 'Tiramisú casero' },
+    { id: 7,  questionText: `¿Quién siempre llega tarde a los planes?`,                                       suggestedCorrectAnswer: groom },
+    { id: 8,  questionText: `¿Quién es el más romántico de los dos?`,                                        suggestedCorrectAnswer: groom },
+    { id: 9,  questionText: `¿Cuál es el destino de viaje soñado de la pareja?`,                             suggestedCorrectAnswer: 'Un paraíso tropical' },
+    { id: 10, questionText: `¿Quién pierde el teléfono o las llaves con más frecuencia?`,                    suggestedCorrectAnswer: groom },
+    { id: 11, questionText: `¿Cuál es el hobbie favorito de la pareja juntos?`,                              suggestedCorrectAnswer: 'Cocinar y explorar nuevos lugares' },
+    { id: 12, questionText: `¿Quién fue el primero en decir "te amo"?`,                                      suggestedCorrectAnswer: groom },
+    { id: 13, questionText: `¿Qué tienen en común ${bride} y ${groom} que los hace una pareja especial?`,    suggestedCorrectAnswer: 'Su sentido del humor y amor' },
+    { id: 14, questionText: `¿Cómo resumirías la famosa anécdota de la pareja?`,                             suggestedCorrectAnswer: anecShort },
+    { id: 15, questionText: `¿Qué planes tiene la pareja para su luna de miel?`,                             suggestedCorrectAnswer: 'Un viaje lleno de sorpresas' },
+  ];
+}
+
+function getSmartDistractors(correctAnswer: string, questionText: string, bride: string, groom: string): string[] {
+  const q = questionText.toLowerCase();
+  const ca = correctAnswer.toLowerCase();
+  const brideL = bride.toLowerCase();
+  const groomL = groom.toLowerCase();
+
+  if ((q.includes('quién') || q.includes('quien')) && (ca === brideL || ca === groomL)) {
+    const other = ca === brideL ? groom : bride;
+    return [other, 'Los dos al mismo tiempo', 'Ninguno — fue obra del destino'];
+  }
+  if (q.includes('luna de miel') || q.includes('viaje') || q.includes('destino') || q.includes('dónde')) {
+    return ['Las montañas de los Alpes', 'Un crucero por el Mediterráneo', 'Ciudad de México histórica'];
+  }
+  if (q.includes('postre') || q.includes('comida') || q.includes('cocin') || q.includes('plato')) {
+    return ['Sushi con rolls de salmón', 'Tacos al pastor con guacamole', 'Pastel de tres leches'];
+  }
+  if (q.includes('canción') || q.includes('música') || q.includes('musica') || q.includes('balada')) {
+    return ['Una cumbia animada de fiesta', 'Rock alternativo con distorsión', 'Vallenato clásico de los 90s'];
+  }
+  if (q.includes('primero') || q.includes('primera') || q.includes('primer paso')) {
+    return [groom, 'Los dos a la vez', 'Ninguno — fue un tercero quien los presentó'];
+  }
+  return [
+    `${groom} — sin duda alguna`,
+    'Los dos por igual',
+    'Ninguno, prefieren guardarlo en secreto'
+  ];
+}
 
 interface CouplePanelProps {
   onBackToMenu: () => void;
@@ -65,45 +176,65 @@ export default function CouplePanel({
   const [saveStatus, setSaveStatus] = React.useState<'idle' | 'saving' | 'saved'>('idle');
   const [apiMessage, setApiMessage] = React.useState<string | null>(null);
 
-  // Generate 15 questions using our AI Architect backend route
+  // Generate 15 questions — 3 tiers: client Gemini → server API → local template
   const handleGenerateQuestions = async () => {
     setLoadingQuestions(true);
     setApiMessage(null);
-    try {
-      const response = await fetch('/api/generate-questions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bio),
-      });
 
-      if (!response.ok) {
-        throw new Error('Server returned an error generating questions.');
+    const bride = bio.brideName || 'La Novia';
+    const groom = bio.groomName || 'El Novio';
+    let rawQuestions: Array<{id: number; questionText: string; suggestedCorrectAnswer: string}> | null = null;
+    let usedRealAI = false;
+
+    // Tier 1: Gemini direct from browser (no server needed)
+    const geminiKey = getGeminiKey();
+    if (geminiKey) {
+      try {
+        rawQuestions = await geminiGenerateQuestions(geminiKey, bio);
+        usedRealAI = true;
+      } catch (e) {
+        console.warn('Client Gemini failed, trying server:', e);
       }
-
-      const data = await response.json();
-      
-      // Map API questions and prepare standard default options (using just the correct answer as the lone option for now)
-      const mapped: Question[] = data.questions.map((q: any) => ({
-        id: q.id,
-        questionText: q.questionText,
-        correctAnswer: q.suggestedCorrectAnswer,
-        suggestedCorrectAnswer: q.suggestedCorrectAnswer,
-        // Default options array containing the correct answer until distractors are fetched
-        options: [q.suggestedCorrectAnswer, "Opción B", "Opción C", "Opción D"]
-      }));
-
-      setQuestions(mapped);
-      if (data.usingFallback) {
-        setApiMessage('💡 Ejecutando en Modo de Demostración: Hemos adaptado 15 preguntas divertidas de boda. ¡Configura tu GEMINI_API_KEY en la configuración para generar preguntas personalizadas en tiempo real con IA!');
-      } else {
-        setApiMessage('✨ ¡Éxito! La IA de Gemini ha analizado su historia de amor y ha redactado 15 preguntas personalizadas para sus invitados.');
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert('Error al conectar con la API del Quiz de Bodas. Por favor, verifica tu conexión.');
-    } finally {
-      setLoadingQuestions(false);
     }
+
+    // Tier 2: Server API (works in dev with Express running)
+    if (!rawQuestions) {
+      try {
+        const res = await fetch('/api/generate-questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bio),
+          signal: AbortSignal.timeout(12000)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          rawQuestions = data.questions;
+          if (!data.usingFallback) usedRealAI = true;
+        }
+      } catch {
+        // Server not reachable (production) — fall through to tier 3
+      }
+    }
+
+    // Tier 3: Client-side template fallback — always works
+    if (!rawQuestions) {
+      rawQuestions = getClientFallbackQuestions(bride, groom, bio.howWeMet, bio.funnyAnecdote);
+    }
+
+    const mapped: Question[] = rawQuestions.map((q) => ({
+      id: q.id,
+      questionText: q.questionText,
+      correctAnswer: q.suggestedCorrectAnswer,
+      suggestedCorrectAnswer: q.suggestedCorrectAnswer,
+      options: [q.suggestedCorrectAnswer, 'Opción B', 'Opción C', 'Opción D']
+    }));
+
+    setQuestions(mapped);
+    setApiMessage(usedRealAI
+      ? '✨ ¡Éxito! La IA de Gemini ha analizado su historia de amor y redactado 15 preguntas personalizadas.'
+      : '💡 15 preguntas plantilla listas para personalizar. Edita las respuestas correctas y luego genera opciones con el botón de cada una.'
+    );
+    setLoadingQuestions(false);
   };
 
   // Helper utility to shuffle response options
@@ -116,67 +247,60 @@ export default function CouplePanel({
     return arr;
   };
 
-  // Calls the AI Smart Distractors API line-item by line-item
+  // Generate distractors — 3 tiers: client Gemini → server API → smart local fallback
   const handleGenerateDistractors = async (questionId: number) => {
     const qIndex = questions.findIndex(q => q.id === questionId);
     if (qIndex === -1) return;
-
     const targetQuestion = questions[qIndex];
     if (!targetQuestion.correctAnswer.trim()) {
-      alert('¡Por favor ingresa una respuesta correcta definitiva antes de generar los distractores inteligentes!');
+      alert('¡Por favor ingresa una respuesta correcta definitiva antes de generar los distractores!');
       return;
     }
 
     setLoadingDistractors(prev => ({ ...prev, [questionId]: true }));
-    try {
-      const response = await fetch('/api/generate-distractors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questionText: targetQuestion.questionText,
-          correctAnswer: targetQuestion.correctAnswer
-        }),
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch from distractors database');
+    let distractors: string[] | null = null;
+
+    // Tier 1: Gemini direct from browser
+    const geminiKey = getGeminiKey();
+    if (geminiKey) {
+      try {
+        distractors = await geminiGenerateDistractors(geminiKey, targetQuestion.questionText, targetQuestion.correctAnswer);
+      } catch (e) {
+        console.warn('Client Gemini distractor failed:', e);
       }
-
-      const data = await response.json();
-      const generatedDistractors: string[] = data.distractors || [];
-
-      // Combine correct answer and 3 distractors, then shuffle
-      const combinedOptions = shuffleArray([
-        targetQuestion.correctAnswer,
-        ...generatedDistractors.slice(0, 3)
-      ]);
-
-      // Update question options list in state
-      setQuestions(prev => {
-        const updated = [...prev];
-        updated[qIndex] = {
-          ...updated[qIndex],
-          options: combinedOptions
-        };
-        return updated;
-      });
-    } catch (err) {
-      console.error(err);
-      // Fail gracefully and create friendly, wedding-themed distractors
-      const defaultSpokes = [
-        `Otra opción genérica de respuesta ficticia`,
-        `Un escenario completamente diferente en la boda`,
-        `${targetQuestion.correctAnswer} - pero con un giro dramático`
-      ];
-      const combined = shuffleArray([targetQuestion.correctAnswer, ...defaultSpokes]);
-      setQuestions(prev => {
-        const updated = [...prev];
-        updated[qIndex] = { ...updated[qIndex], options: combined };
-        return updated;
-      });
-    } finally {
-      setLoadingDistractors(prev => ({ ...prev, [questionId]: false }));
     }
+
+    // Tier 2: Server API
+    if (!distractors) {
+      try {
+        const res = await fetch('/api/generate-distractors', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questionText: targetQuestion.questionText, correctAnswer: targetQuestion.correctAnswer }),
+          signal: AbortSignal.timeout(10000)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          distractors = data.distractors;
+        }
+      } catch {
+        // Server not reachable — fall through
+      }
+    }
+
+    // Tier 3: Smart local fallback (wedding-themed, context-aware)
+    if (!distractors || distractors.length < 3) {
+      distractors = getSmartDistractors(targetQuestion.correctAnswer, targetQuestion.questionText, bio.brideName, bio.groomName);
+    }
+
+    const combined = shuffleArray([targetQuestion.correctAnswer, ...distractors.slice(0, 3)]);
+    setQuestions(prev => {
+      const updated = [...prev];
+      updated[qIndex] = { ...updated[qIndex], options: combined };
+      return updated;
+    });
+    setLoadingDistractors(prev => ({ ...prev, [questionId]: false }));
   };
 
   // Quick helper to auto-generate distractors for ALL questions in a single button click (Highly popular for quick setups)
