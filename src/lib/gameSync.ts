@@ -23,24 +23,25 @@ import { GameState, Question, Guest, GuestResponse } from '../types';
 const SESSION_DOC_ID = 'main_wedding_party';
 
 // Preguntas reales de Rafael Robles Pimienta & Ana Cecilia Falcon Missett
+// La respuesta correcta rota entre posiciones B-C-D-A para que no sea siempre la primera
 export const DEFAULT_LOBBY_QUESTIONS: Question[] = [
   {
     id: 1,
     questionText: "¿En qué lugar se conocieron Rafael y Ceci por primera vez?",
     correctAnswer: "En la secundaria",
-    options: ["En la secundaria", "En la universidad", "En un concierto de rock", "En un restaurante"]
+    options: ["En la universidad", "En la secundaria", "En un concierto de rock", "En un restaurante"]
   },
   {
     id: 2,
     questionText: "¿En qué universo vivía Rafael cuando Ceci lo conoció?",
     correctAnswer: "Anime, música y videojuegos",
-    options: ["Anime, música y videojuegos", "Fútbol y natación", "Lectura y cocina", "Ciclismo y fotografía"]
+    options: ["Fútbol y natación", "Lectura y cocina", "Anime, música y videojuegos", "Ciclismo y fotografía"]
   },
   {
     id: 3,
     questionText: "¿Qué detalle especial le regaló Rafael a Ceci en la secundaria?",
     correctAnswer: "Una carta y un dibujo",
-    options: ["Una carta y un dibujo", "Un ramo de flores", "Un libro de poesía", "Un peluche de anime"]
+    options: ["Un ramo de flores", "Un libro de poesía", "Un peluche de anime", "Una carta y un dibujo"]
   },
   {
     id: 4,
@@ -52,19 +53,19 @@ export const DEFAULT_LOBBY_QUESTIONS: Question[] = [
     id: 5,
     questionText: "¿Cuál es el género musical favorito de la pareja?",
     correctAnswer: "Rock alternativo e indie",
-    options: ["Rock alternativo e indie", "Reggaeton y cumbia", "Pop en español", "Jazz y blues"]
+    options: ["Reggaeton y cumbia", "Rock alternativo e indie", "Pop en español", "Jazz y blues"]
   },
   {
     id: 6,
     questionText: "¿Qué hacen Rafael y Ceci en un día lluvioso perfecto?",
     correctAnswer: "Acostados con sus perritos escuchando música",
-    options: ["Acostados con sus perritos escuchando música", "Ver fútbol con amigos", "Cocinar recetas nuevas juntos", "Jugar videojuegos en competencia"]
+    options: ["Ver fútbol con amigos", "Cocinar recetas nuevas juntos", "Acostados con sus perritos escuchando música", "Jugar videojuegos en competencia"]
   },
   {
     id: 7,
     questionText: "¿Qué actividad eligen cuando quieren pasar tiempo juntos en casa?",
     correctAnswer: "Juegos de mesa",
-    options: ["Juegos de mesa", "Videojuegos competitivos", "Cartas y póker", "Trivias en línea"]
+    options: ["Videojuegos competitivos", "Cartas y póker", "Trivias en línea", "Juegos de mesa"]
   },
   {
     id: 8,
@@ -76,19 +77,19 @@ export const DEFAULT_LOBBY_QUESTIONS: Question[] = [
     id: 9,
     questionText: "¿Qué tipo de restaurantes son los favoritos de Rafael y Ceci?",
     correctAnswer: "Restaurantes de espadas y buffets",
-    options: ["Restaurantes de espadas y buffets", "Sushi y comida japonesa", "Taquerías y antojitos", "Pizzerías italianas"]
+    options: ["Sushi y comida japonesa", "Restaurantes de espadas y buffets", "Taquerías y antojitos", "Pizzerías italianas"]
   },
   {
     id: 10,
     questionText: "¿Cuál fue la razón de Ceci para no poder entrar al trabajo aquella mañana?",
     correctAnswer: "Traía tenis",
-    options: ["Traía tenis", "Se le olvidó la credencial", "El metro estaba lleno", "Había olvidado desayunar"]
+    options: ["Se le olvidó la credencial", "El metro estaba lleno", "Traía tenis", "Había olvidado desayunar"]
   },
   {
     id: 11,
     questionText: "¿Qué hizo Rafael cuando Ceci dijo que quería irse de pinta?",
     correctAnswer: "La cargó hasta los torniquetes del metro",
-    options: ["La cargó hasta los torniquetes del metro", "Se regresó a casa con ella", "La convenció de quedarse en cama", "Le compró un café para animarla"]
+    options: ["Se regresó a casa con ella", "La convenció de quedarse en cama", "Le compró un café para animarla", "La cargó hasta los torniquetes del metro"]
   },
   {
     id: 12,
@@ -100,19 +101,19 @@ export const DEFAULT_LOBBY_QUESTIONS: Question[] = [
     id: 13,
     questionText: "¿Cuál es el anime favorito que comparte la pareja?",
     correctAnswer: "Demon Slayer",
-    options: ["Demon Slayer", "Dragon Ball Z", "Naruto Shippuden", "Attack on Titan"]
+    options: ["Dragon Ball Z", "Demon Slayer", "Naruto Shippuden", "Attack on Titan"]
   },
   {
     id: 14,
     questionText: "Según los votos de Ceci, ¿qué le enseñó Rafael con su mundo de anime y música?",
     correctAnswer: "Que la magia se descubre si pones atención",
-    options: ["Que la magia se descubre si pones atención", "Que el amor es cuestión de suerte", "Que los opuestos siempre se atraen", "Que el tiempo lo cura todo"]
+    options: ["Que el amor es cuestión de suerte", "Que los opuestos siempre se atraen", "Que la magia se descubre si pones atención", "Que el tiempo lo cura todo"]
   },
   {
     id: 15,
     questionText: "¿Cómo define Ceci en sus votos la diferencia entre ella y Rafael?",
     correctAnswer: "Diferentes que se volvieron un equipo",
-    options: ["Diferentes que se volvieron un equipo", "Idénticos en todo desde el principio", "Opuestos que nunca cambiaron", "Parecidos desde que se conocieron"]
+    options: ["Idénticos en todo desde el principio", "Opuestos que nunca cambiaron", "Parecidos desde que se conocieron", "Diferentes que se volvieron un equipo"]
   }
 ];
 
