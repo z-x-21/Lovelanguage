@@ -92,29 +92,54 @@ function getClientFallbackQuestions(bride: string, groom: string, howWeMet: stri
 function getSmartDistractors(correctAnswer: string, questionText: string, bride: string, groom: string): string[] {
   const q = questionText.toLowerCase();
   const ca = correctAnswer.toLowerCase();
+
+  // Match each of the 15 pre-loaded wedding questions by keyword fingerprint
+  if (q.includes('conocieron') && q.includes('primera vez'))
+    return ['En la universidad', 'En un concierto de rock', 'En un restaurante'];
+  if (q.includes('universo') || (q.includes('mundo') && q.includes('rafael')))
+    return ['Fútbol y natación', 'Lectura y cocina', 'Ciclismo y fotografía'];
+  if (q.includes('detalle') || q.includes('regaló') || q.includes('regalo'))
+    return ['Un ramo de flores', 'Un libro de poesía', 'Un peluche de anime'];
+  if (q.includes('películas') || q.includes('peliculas'))
+    return ['Comedias románticas', 'Documentales de naturaleza', 'Acción y superhéroes'];
+  if (q.includes('género musical') || q.includes('genero musical') || (q.includes('música') && q.includes('favorit')))
+    return ['Reggaeton y cumbia', 'Pop en español', 'Jazz y blues'];
+  if (q.includes('lluvioso') || q.includes('lluvia'))
+    return ['Ver fútbol con amigos', 'Cocinar recetas nuevas juntos', 'Jugar videojuegos en competencia'];
+  if (q.includes('actividad') && q.includes('casa'))
+    return ['Videojuegos competitivos', 'Cartas y póker', 'Trivias en línea'];
+  if (q.includes('serie') && q.includes('terror'))
+    return ['Stranger Things', 'American Horror Story', 'The Haunting of Bly Manor'];
+  if (q.includes('restaurante') && q.includes('favorit'))
+    return ['Sushi y comida japonesa', 'Taquerías y antojitos', 'Pizzerías italianas'];
+  if (q.includes('trabajo') && (q.includes('entrar') || q.includes('razón') || q.includes('razon')))
+    return ['Se le olvidó la credencial', 'El metro estaba lleno', 'Había olvidado desayunar'];
+  if (q.includes('pinta') || q.includes('torniquetes') || q.includes('cargó'))
+    return ['Se regresó a casa con ella', 'La convenció de quedarse en cama', 'Le compró un café para animarla'];
+  if (q.includes('después') && (q.includes('tenis') || q.includes('incidente')))
+    return ['Al parque con sus perritos', 'Al cine a ver terror', 'A casa a descansar todo el día'];
+  if (q.includes('anime') && (q.includes('favorito') || q.includes('comparte')))
+    return ['Dragon Ball Z', 'Naruto Shippuden', 'Attack on Titan'];
+  if (q.includes('votos') && q.includes('enseñ'))
+    return ['Que el amor es cuestión de suerte', 'Que los opuestos siempre se atraen', 'Que el tiempo lo cura todo'];
+  if (q.includes('votos') && q.includes('diferencia'))
+    return ['Idénticos en todo desde el principio', 'Opuestos que nunca cambiaron', 'Parecidos desde que se conocieron'];
+
+  // Fallback genérico por tipo de respuesta
   const brideL = bride.toLowerCase();
   const groomL = groom.toLowerCase();
-
   if ((q.includes('quién') || q.includes('quien')) && (ca === brideL || ca === groomL)) {
     const other = ca === brideL ? groom : bride;
     return [other, 'Los dos al mismo tiempo', 'Ninguno — fue obra del destino'];
   }
-  if (q.includes('luna de miel') || q.includes('viaje') || q.includes('destino') || q.includes('dónde')) {
-    return ['Las montañas de los Alpes', 'Un crucero por el Mediterráneo', 'Ciudad de México histórica'];
-  }
-  if (q.includes('postre') || q.includes('comida') || q.includes('cocin') || q.includes('plato')) {
-    return ['Sushi con rolls de salmón', 'Tacos al pastor con guacamole', 'Pastel de tres leches'];
-  }
-  if (q.includes('canción') || q.includes('música') || q.includes('musica') || q.includes('balada')) {
-    return ['Una cumbia animada de fiesta', 'Rock alternativo con distorsión', 'Vallenato clásico de los 90s'];
-  }
-  if (q.includes('primero') || q.includes('primera') || q.includes('primer paso')) {
-    return [groom, 'Los dos a la vez', 'Ninguno — fue un tercero quien los presentó'];
-  }
+  if (q.includes('dónde') || q.includes('donde') || q.includes('lugar'))
+    return ['En la ciudad de México', 'En un evento familiar', 'En las redes sociales'];
+  if (q.includes('canción') || q.includes('música') || q.includes('musica'))
+    return ['Una cumbia de fiesta', 'Un bolero romántico', 'Pop en español de los 2000s'];
   return [
-    `${groom} — sin duda alguna`,
-    'Los dos por igual',
-    'Ninguno, prefieren guardarlo en secreto'
+    'En un momento inesperado',
+    'Todavía lo están descubriendo',
+    'Depende de a quién le preguntes'
   ];
 }
 
