@@ -1,33 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default catch-all denies everything else by default
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Helper to prevent resource ID poisoning
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Main Wedding Session Collection
     match /sessions/{sessionId} {
       allow read, write: if isValidId(sessionId);
 
-      // Questions storage
       match /setup/{setupId} {
         allow read, write: if isValidId(sessionId) && isValidId(setupId);
       }
 
-      // Guest active status & scoring
+      // get/write validan el guestId; list no tiene guestId vinculado — regla separada
       match /guests/{guestId} {
-        allow read, write: if isValidId(sessionId) && isValidId(guestId);
+        allow get, create, update, delete: if isValidId(sessionId) && isValidId(guestId);
+        allow list: if isValidId(sessionId);
       }
 
-      // User response streaming
       match /responses/{responseId} {
-        allow read, write: if isValidId(sessionId) && isValidId(responseId);
+        allow get, create, update, delete: if isValidId(sessionId) && isValidId(responseId);
+        allow list: if isValidId(sessionId);
       }
     }
   }
